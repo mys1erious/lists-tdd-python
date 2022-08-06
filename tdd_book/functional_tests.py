@@ -1,5 +1,7 @@
+import unittest
+
 from selenium import webdriver
-from django.test import TestCase
+from unittest import TestCase
 
 
 class NewVisitorTest(TestCase):
@@ -34,3 +36,7 @@ class NewVisitorTest(TestCase):
 
         # Satisfied, she goes back to sleep
         self.fail('Finish the test!')
+
+
+if __name__ == '__main__':
+    unittest.main(warnings='ignore')
