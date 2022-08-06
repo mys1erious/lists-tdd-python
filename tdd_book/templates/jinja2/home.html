@@ -14,7 +14,6 @@
         <input name="item_text" id="id_new_item" placeholder="Enter a to-do item"/>
     </form>
 
-
     <table id="id_list_table">
         {% for item in items %}
             <tr><td>{{ loop.index }}: {{ item.text }}</td></tr>
