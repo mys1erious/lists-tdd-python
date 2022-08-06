@@ -1,8 +1,8 @@
 from selenium import webdriver
-import unittest
+from django.test import TestCase
 
 
-class NewVisitorTest(unittest.TestCase):
+class NewVisitorTest(TestCase):
     def setUp(self) -> None:
         self.browser = webdriver.Firefox()
 
@@ -34,7 +34,3 @@ class NewVisitorTest(unittest.TestCase):
 
         # Satisfied, she goes back to sleep
         self.fail('Finish the test!')
-
-
-if __name__ == '__main__':
-    unittest.main(warnings='ignore')
