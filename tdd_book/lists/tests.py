@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.urls import resolve
 
 from .views import home_page
-from .models import Item
+from .models import Item, List
 
 
 class HomePageTest(TestCase):
@@ -16,13 +16,21 @@ class HomePageTest(TestCase):
 
 class ItemModelTest(TestCase):
     def test_saving_and_retrieving_item(self):
+        lst = List()
+        lst.save()
+
         first_item = Item()
         first_item.text = 'The first (ever) list item'
+        first_item.list = lst
         first_item.save()
 
         second_item = Item()
         second_item.text = 'Item the second'
+        second_item.list = lst
         second_item.save()
+
+        saved_list = List.objects.first()
+        self.assertEqual(saved_list, lst)
 
         saved_items = Item.objects.all()
         self.assertEqual(saved_items.count(), 2)
@@ -30,7 +38,9 @@ class ItemModelTest(TestCase):
         first_saved_item = saved_items[0]
         second_saved_item = saved_items[1]
         self.assertEqual(first_saved_item.text, 'The first (ever) list item')
+        self.assertEqual(first_saved_item.list, lst)
         self.assertEqual(second_saved_item.text, 'Item the second')
+        self.assertEqual(second_saved_item.list, lst)
 
 
 class ListViewTest(TestCase):
@@ -40,8 +50,9 @@ class ListViewTest(TestCase):
         self.assertIn('list.html', html)
 
     def test_displays_all_list_items(self):
-        Item.objects.create(text='itemey 1')
-        Item.objects.create(text='itemey 2')
+        lst = List.objects.create()
+        Item.objects.create(text='itemey 1', list=lst)
+        Item.objects.create(text='itemey 2', list=lst)
 
         response = self.client.get('/lists/the-only-list-in-the-world/')
 
