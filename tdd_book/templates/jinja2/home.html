@@ -16,7 +16,9 @@
 
 
     <table id="id_list_table">
-        <tr><td>1: {{ new_item_text }}</td></tr>
+        {% for item in items %}
+            <tr><td>{{ loop.index }}: {{ item.text }}</td></tr>
+        {% endfor %}
     </table>
 </div>
 </body>
