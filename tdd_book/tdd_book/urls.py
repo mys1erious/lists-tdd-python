@@ -11,6 +11,11 @@ urlpatterns = [
         name='home'
     ),
     path(
+        route='lists/new',
+        view=list_views.new_list,
+        name='new_list'
+    ),
+    path(
         route='lists/the-only-list-in-the-world/',
         view=list_views.view_list,
         name='view_list'
