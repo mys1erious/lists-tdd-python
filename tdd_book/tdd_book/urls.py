@@ -10,6 +10,11 @@ urlpatterns = [
         view=list_views.home_page,
         name='home'
     ),
+    path(
+        route='lists/the-only-list-in-the-world/',
+        view=list_views.view_list,
+        name='view_list'
+    ),
 
     path('admin/', admin.site.urls),
 ]

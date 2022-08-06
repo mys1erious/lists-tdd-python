@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from django.test import LiveServerTestCase
 
 
-MAX_WAIT = 10
+MAX_WAIT = 5
 WAIT_TIME = 0.1
 
 
@@ -73,6 +73,7 @@ class NewVisitorTest(LiveServerTestCase):
         # Francis visits the home page. There is no sign of Edith's list
         self.browser.get(self.live_server_url)
         page_text = self.browser.find_element(by=By.TAG_NAME, value='body').text
+        time.sleep(10)
         self.assertNotIn('Buy peacock feathers', page_text)
         self.assertNotIn('make a fly', page_text)
 
