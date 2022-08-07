@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="template" content="{{ self._TemplateReference__context.name }}">
+    <title>To-Do lists</title>
+</head>
+<body>
+<div>
+    <h1>{% block header_text %}{% endblock %}</h1>
+
+    <form method="POST" action="{% block form_action %}{% endblock %}">
+        {{ csrf_input }}
+        <input name="item_text" id="id_new_item" placeholder="Enter a to-do item"/>
+    </form>
+
+    {% block table %}
+    {% endblock %}
+</div>
+</body>
+</html>
