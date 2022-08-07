@@ -16,5 +16,5 @@ urlpatterns = [
         view=include(list_urls)
     ),
 
-    path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
 ]
