@@ -73,7 +73,6 @@ class NewVisitorTest(LiveServerTestCase):
         # Francis visits the home page. There is no sign of Edith's list
         self.browser.get(self.live_server_url)
         page_text = self.browser.find_element(by=By.TAG_NAME, value='body').text
-        time.sleep(10)
         self.assertNotIn('Buy peacock feathers', page_text)
         self.assertNotIn('make a fly', page_text)
 
@@ -85,13 +84,13 @@ class NewVisitorTest(LiveServerTestCase):
 
         # Francis gets his own unique URL
         francis_list_url = self.browser.current_url
-        self.assertRegex(francis_list_url, '/lists/,+')
+        self.assertRegex(francis_list_url, '/lists/.+')
         self.assertNotEqual(francis_list_url, edith_list_url)
 
         # Again, there is no trace of Edith's list
         page_text = self.browser.find_element(by=By.TAG_NAME, value='body').text
         self.assertNotIn('Buy peacock feathers', page_text)
-        self.assertNotIn('Buy milk', page_text)
+        self.assertIn('Buy milk', page_text)
 
     def wait_for_row_in_list_table(self, row_text):
         start_time = time.time()

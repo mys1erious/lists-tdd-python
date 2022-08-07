@@ -16,9 +16,14 @@ urlpatterns = [
         name='new_list'
     ),
     path(
-        route='lists/the-only-list-in-the-world/',
+        route='lists/<int:pk>/',
         view=list_views.view_list,
         name='view_list'
+    ),
+    path(
+        route='lists/<int:pk>/add_item',
+        view=list_views.add_item,
+        name='add_item'
     ),
 
     path('admin/', admin.site.urls),
