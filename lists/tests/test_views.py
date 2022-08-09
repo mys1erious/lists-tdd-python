@@ -57,6 +57,19 @@ class ListViewTest(TestCase):
 
         self.assertRedirects(response, f'/lists/{correct_list.id}/')
 
+    def test_validation_errors_end_up_on_lists_page(self):
+        lst = List.objects.create()
+        response = self.client.post(
+            f'/lists/{lst.id}/',
+            data={'item_text': ''}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode('utf8')
+        self.assertIn('list.html', html)
+        expected_error = 'You cant have an empty list item'
+        self.assertContains(response, expected_error)
+
     # Rework for jinja templates
     # def test_passes_correct_list_to_template(self):
     #     other_list = List.objects.create()
