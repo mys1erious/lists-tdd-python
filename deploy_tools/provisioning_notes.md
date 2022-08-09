@@ -32,9 +32,11 @@ Assume we have a user account at /home/username
 
 
 ## Nginx and Systemd activation
+- Fabric deployment: <br>
+  `fab deploy:host=USERNAME@SITE_URL`
 - Nginx conf: <br>
   `sed "s/SITENAME/SITE_URL/g" source/deploy_tools/nginx.template.conf | sudo tee /etc/nginx/sites-available/SITE_URL`
 - Activate with a symlink: <br>
   `sudo ln -s /etc/nginx/sites-available/SITE_URL /etc/nginx/sites-enabled/SITE_URL`
-- Systemd servoce: <br>
+- Systemd service: <br>
   `sed "s/SITENAME/SITE_URL/g" source/deploy_tools/gunicorn-systemd.template.service | sudo tee /etc/systemd/system/gunicorn-SITE_URL.service`
