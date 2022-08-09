@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn server for SITENAME
+
+[Service]
+Restart=on-failure
+User=mys1erious
+WorkingDirectory=/home/mys1erious/sites/SITENAME/source
+ExecStart=/home/mys1erious/sites/SITENAME/virtualenv/bin/gunicorn \
+    --bind unix:/tmp/SITENAME.socket \
+    tdd_book.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
