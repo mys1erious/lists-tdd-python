@@ -29,3 +29,12 @@ Assume we have a user account at /home/username
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├ source <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├ static <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└ virtualenv
+
+
+## Nginx and Systemd activation
+- Nginx conf: <br>
+  `sed "s/SITENAME/SITE_URL/g" source/deploy_tools/nginx.template.conf | sudo tee /etc/nginx/sites-available/SITE_URL`
+- Activate with a symlink: <br>
+  `sudo ln -s /etc/nginx/sites-available/SITE_URL /etc/nginx/sites-enabled/SITE_URL`
+- Systemd servoce: <br>
+  `sed "s/SITENAME/SITE_URL/g" source/deploy_tools/gunicorn-systemd.template.service | sudo tee /etc/systemd/system/gunicorn-SITE_URL.service`
