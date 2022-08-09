@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from ..models import Item, List
 
@@ -29,3 +30,10 @@ class ListAndItemModelTest(TestCase):
         self.assertEqual(first_saved_item.list, lst)
         self.assertEqual(second_saved_item.text, 'Item the second')
         self.assertEqual(second_saved_item.list, lst)
+
+    def test_cant_save_empty_list_items(self):
+        lst = List.objects.create()
+        item = Item(list=lst, text='')
+        with self.assertRaises(ValidationError):
+            item.save()
+            item.full_clean()
