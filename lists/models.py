@@ -10,6 +10,13 @@ class Item(models.Model):
         on_delete=models.CASCADE
     )
 
+    class Meta:
+        unique_together = ('list', 'text')
+        ordering = ('id',)
+
+    def __str__(self):
+        return self.text
+
 
 class List(models.Model):
     def get_absolute_url(self):
