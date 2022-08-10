@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
 from .models import Item, List
-from .forms import ItemForm
+from .forms import ItemForm, ExistingListItemForm
 
 
 def home_page(request):
@@ -13,12 +13,12 @@ def home_page(request):
 
 def view_list(request, pk):
     lst = List.objects.get(id=pk)
-    form = ItemForm()
+    form = ExistingListItemForm(for_list=lst)
 
     if request.method == 'POST':
-        form = ItemForm(data=request.POST)
+        form = ExistingListItemForm(for_list=lst, data=request.POST)
         if form.is_valid():
-            form.save(lst)
+            form.save()
             return redirect(lst)
 
     return render(request, 'list.html', {'form': form, 'list': lst})
