@@ -33,6 +33,9 @@ class FunctionalTest(StaticLiveServerTestCase):
                     raise e
                 time.sleep(WAIT_TIME)
 
+    def get_item_input_box(self):
+        return self.browser.find_element(by=By.ID, value='id_text')
+
     def wait_for_row_in_list_table(self, row_text):
         start_time = time.time()
         while True:
