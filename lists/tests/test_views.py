@@ -1,20 +1,24 @@
 from django.test import TestCase
+
 from ..models import Item, List
+from ..forms import ItemForm
 
 
 class HomePageTest(TestCase):
     def test_uses_home_template(self):
         response = self.client.get('/')
-        html = response.content.decode('utf8')
-        self.assertIn('home.html', html)
+        self.assertTemplateUsed(response, 'home.html')
+
+    def test_uses_item_form(self):
+        response = self.client.get('/')
+        self.assertIsInstance(response.context['form'], ItemForm)
 
 
 class ListViewTest(TestCase):
     def test_uses_list_template(self):
         lst = List.objects.create()
         response = self.client.get(f'/lists/{lst.id}/')
-        html = response.content.decode('utf8')
-        self.assertIn('list.html', html)
+        self.assertTemplateUsed(response, 'list.html')
 
     def test_displays_only_items_from_1_list(self):
         correct_list = List.objects.create()
@@ -65,17 +69,15 @@ class ListViewTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        html = response.content.decode('utf8')
-        self.assertIn('list.html', html)
+        self.assertTemplateUsed(response, 'list.html')
         expected_error = 'You cant have an empty list item'
         self.assertContains(response, expected_error)
 
-    # Rework for jinja templates
-    # def test_passes_correct_list_to_template(self):
-    #     other_list = List.objects.create()
-    #     correct_list = List.objects.create()
-    #     response = self.client.get(f'/lists/{correct_list.id}/')
-    #     self.assertEqual(response.context['list'], correct_list)
+    def test_passes_correct_list_to_template(self):
+        other_list = List.objects.create()
+        correct_list = List.objects.create()
+        response = self.client.get(f'/lists/{correct_list.id}/')
+        self.assertEqual(response.context['list'], correct_list)
 
 
 class NewListTest(TestCase):
@@ -95,8 +97,7 @@ class NewListTest(TestCase):
         response = self.client.post('/lists/new', data={'item_text': ''})
         self.assertEqual(response.status_code, 200)
 
-        html = response.content.decode('utf8')
-        self.assertIn('home.html', html)
+        self.assertTemplateUsed(response, 'home.html')
 
         expected_error = "You cant have an empty list item"
         self.assertContains(response, expected_error)
