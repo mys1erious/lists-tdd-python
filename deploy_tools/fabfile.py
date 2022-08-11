@@ -12,6 +12,7 @@ def deploy():
     _create_directory_structure_if_necessary(site_folder)
     _get_latest_source(source_folder)
     _update_settings(source_folder, env.host)
+    _update_settings_usage(source_folder)
     _update_virtualenv(source_folder)
     _update_static_files(source_folder)
     _update_database(source_folder)
@@ -35,7 +36,6 @@ def _get_latest_source(source_folder):
 
 def _update_settings(source_folder, site_name):
     settings_path = source_folder + '/config/settings/prod.py'
-    # sed(settings_path, "DEBUG = True", 'DEBUG = False')
     sed(settings_path, "ALLOWED_HOSTS =.+", f'ALLOWED_HOSTS = ["{site_name}"]')
 
     secret_key_file = source_folder + '/config/settings/secret_key.py'
@@ -45,6 +45,20 @@ def _update_settings(source_folder, site_name):
         append(secret_key_file, f'SECRET_KEY = "{key}"')
 
     append(settings_path, '\nfrom .secret_key import SECRET_KEY')
+
+
+def _update_settings_usage(source_folder):
+    paths_map = {
+        'wsgi_path': source_folder + '/config/wsgi.py',
+        'asgi_path': source_folder + '/config/asgi.py',
+        'manage_path': source_folder + '/manage.py'
+    }
+
+    for name, path in paths_map.items():
+        sed(path,
+            "os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.base')",
+            "os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.prod')"
+            )
 
 
 def _update_virtualenv(source_folder):
