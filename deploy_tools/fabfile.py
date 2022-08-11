@@ -34,11 +34,11 @@ def _get_latest_source(source_folder):
 
 
 def _update_settings(source_folder, site_name):
-    settings_path = source_folder + '/tdd_book/settings.py'
-    sed(settings_path, "DEBUG = True", 'DEBUG = False')
-    sed(settings_path, 'ALLOWED_HOSTS =.+$', f'ALLOWED_HOSTS = ["{site_name}"]')
+    settings_path = source_folder + '/config/settings/prod.py'
+    # sed(settings_path, "DEBUG = True", 'DEBUG = False')
+    append(settings_path, f'ALLOWED_HOSTS += ["{site_name}"]')
 
-    secret_key_file = source_folder + '/tdd_book/secret_key.py'
+    secret_key_file = source_folder + '/config/secret_key.py'
     if not exists(secret_key_file):
         chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
         key = ''.join(random.SystemRandom().choice(chars) for _ in range(50))
@@ -51,6 +51,9 @@ def _update_virtualenv(source_folder):
     virtualenv_folder = source_folder + '/../virtualenv'
     if not exists(virtualenv_folder + '/bin/pip'):
         run(f'python3.9 -m venv {virtualenv_folder}')
+
+        activate_script_path = f'{virtualenv_folder}/bin/activate'
+        append(activate_script_path, '\nexport DJANGO_SETTINGS_MODULE=config.settings.prod')
 
     run(f'{virtualenv_folder}/bin/pip install -r {source_folder}/requirements.txt')
 
