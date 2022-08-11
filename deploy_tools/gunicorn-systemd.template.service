@@ -7,7 +7,7 @@ User=mys1erious
 WorkingDirectory=/home/mys1erious/sites/SITENAME/source
 ExecStart=/home/mys1erious/sites/SITENAME/virtualenv/bin/gunicorn \
     --bind unix:/tmp/SITENAME.socket \
-    tdd_book.wsgi:application
+    config.wsgi:application
 
 [Install]
 WantedBy=multi-user.target
