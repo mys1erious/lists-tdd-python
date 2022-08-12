@@ -42,5 +42,6 @@ Assume we have a user account at /home/username
   `sed "s/SITENAME/SITE_URL/g" source/deploy_tools/gunicorn-systemd.template.service | sudo tee /etc/systemd/system/gunicorn-SITE_URL.service`
 - Update after setup: <br>
   `sudo systemctl daemon-reload` <br>
+  `sudo systemctl reload nginx` <br>
   `sudo systemctl enable gunicorn-SITE_URL` <br>
   `sudo systemctl start gunicorn-SITE_URL`
