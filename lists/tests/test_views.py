@@ -9,7 +9,7 @@ from ..forms import ItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR, ExistingLi
 class HomePageTest(TestCase):
     def test_uses_home_template(self):
         response = self.client.get('/')
-        self.assertTemplateUsed(response, 'home.html')
+        self.assertTemplateUsed(response, 'lists/home.html')
 
     def test_uses_item_form(self):
         response = self.client.get('/')
@@ -20,7 +20,7 @@ class ListViewTest(TestCase):
     def test_uses_list_template(self):
         lst = List.objects.create()
         response = self.client.get(f'/lists/{lst.id}/')
-        self.assertTemplateUsed(response, 'list.html')
+        self.assertTemplateUsed(response, 'lists/list.html')
 
     def test_displays_only_items_from_1_list(self):
         correct_list = List.objects.create()
@@ -70,7 +70,7 @@ class ListViewTest(TestCase):
     def test_invalid_input_renders_list_template(self):
         response = self.post_invalid_input()
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'list.html')
+        self.assertTemplateUsed(response, 'lists/list.html')
 
     def test_invalid_input_passes_form_to_template(self):
         response = self.post_invalid_input()
@@ -89,7 +89,7 @@ class ListViewTest(TestCase):
         )
 
         self.assertContains(response, DUPLICATE_ITEM_ERROR)
-        self.assertTemplateUsed(response, 'list.html')
+        self.assertTemplateUsed(response, 'lists/list.html')
         self.assertEqual(Item.objects.all().count(), 1)
 
     def test_passes_correct_list_to_template(self):
@@ -125,7 +125,7 @@ class NewListTest(TestCase):
     def test_invalid_input_renders_home_template(self):
         response = self.client.post('/lists/new', data={'text': ''})
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'home.html')
+        self.assertTemplateUsed(response, 'lists/home.html')
 
     def test_invalid_input_passes_form_to_template(self):
         response = self.client.post('/lists/new', data={'text': ''})

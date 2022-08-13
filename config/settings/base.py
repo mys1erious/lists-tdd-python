@@ -1,7 +1,21 @@
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
+from dotenv import load_dotenv
+
+
+load_dotenv()
+def get_env_var(var_name):
+    try:
+        return os.getenv(var_name)
+    except KeyError:
+        error_msg = f'Set the {var_name} env variable.'
+        raise ImproperlyConfigured(error_msg)
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
@@ -20,6 +34,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'accounts',
     'lists',
 
     # 'django.contrib.admin',
@@ -61,7 +76,15 @@ TEMPLATES = [
         'DIRS': [
             os.path.join(BASE_DIR, 'templates', 'jinja2'),
         ],
-        'OPTIONS': {'environment': 'config.jinja2.environment'},
+        'OPTIONS': {
+            'environment': 'config.jinja2.environment',
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
     },
 ]
 
@@ -119,3 +142,35 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+AUTH_USER_MODEL = 'accounts.User'
+AUTHENTICATION_BACKENDS = [
+    'accounts.authentication.PasswordlessAuthenticationBackend',
+]
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+        },
+    },
+    'root': {'level': 'INFO'},
+}
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = get_env_var('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = get_env_var('EMAIL_HOST_PASSWORD')

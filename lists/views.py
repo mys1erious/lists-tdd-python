@@ -8,7 +8,7 @@ from .forms import ItemForm, ExistingListItemForm
 
 def home_page(request):
     if request.method == "GET":
-        return render(request, 'home.html', {'form': ItemForm()})
+        return render(request, 'lists/home.html', {'form': ItemForm()})
 
 
 def view_list(request, pk):
@@ -21,7 +21,7 @@ def view_list(request, pk):
             form.save()
             return redirect(lst)
 
-    return render(request, 'list.html', {'form': form, 'list': lst})
+    return render(request, 'lists/list.html', {'form': form, 'list': lst})
 
 
 def new_list(request):
@@ -32,5 +32,5 @@ def new_list(request):
             form.save(for_list=lst)
             return redirect(lst)
 
-        return render(request, 'home.html', {'form': form})
+        return render(request, 'lists/home.html', {'form': form})
 
