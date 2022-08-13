@@ -1,7 +1,9 @@
 from django.urls import path
+
 from .views import (
     send_login_email,
-    login as login_view
+    login as login_view,
+    logout as logout_view
 )
 
 
@@ -15,5 +17,10 @@ urlpatterns = [
         route='login',
         view=login_view,
         name='login'
+    ),
+    path(
+        'logout',
+        logout_view,
+        name='logout'
     )
 ]
