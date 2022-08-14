@@ -18,6 +18,7 @@ eg, on Ubuntu:
 ## Systemd service
 * see gunicorn-systemd.template.service
 * replace SITENAME with, e.g., staging.my-domain.com
+* replace STAGING_MAIL_PASS with email password
 
 ## Folder structure:
 Assume we have a user account at /home/username
