@@ -36,6 +36,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'accounts',
     'lists',
+    'functional_tests',
 
     # 'django.contrib.admin',
     'django.contrib.auth',
