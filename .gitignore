@@ -133,3 +133,4 @@ dmypy.json
 .idea/
 geckodriver.log
 collectedstatic/
+functional_tests/screendumps

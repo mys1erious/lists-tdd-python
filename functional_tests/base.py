@@ -1,5 +1,6 @@
 import os
 import time
+from datetime import datetime
 
 from selenium import webdriver
 from selenium.common import WebDriverException
@@ -13,6 +14,9 @@ from .server_tools import reset_database
 
 MAX_WAIT = 10
 WAIT_TIME = 0.1
+SCREEN_DUMP_LOCATION = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), 'screendumps'
+)
 
 
 def wait(fn):
@@ -38,7 +42,35 @@ class FunctionalTest(StaticLiveServerTestCase):
             reset_database(self.staging_server)
 
     def tearDown(self) -> None:
+        if self._test_has_failed():
+            if not os.path.exists(SCREEN_DUMP_LOCATION):
+                os.makedirs(SCREEN_DUMP_LOCATION)
+            for ix, handle in enumerate(self.browser.window_handles):
+                self._windowid = ix
+                self.browser.switch_to.window(handle)
+                self.take_screenshot()
+                self.dump_html()
         self.browser.quit()
+        super().tearDown()
+
+    def _test_has_failed(self):
+        return any(error for (method, error) in self._outcome.errors)
+
+    def take_screenshot(self):
+        filename = self._get_filename() + '.png'
+        print('screenshotting to', filename)
+        self.browser.get_screenshot_as_file(filename)
+
+    def dump_html(self):
+        filename = self._get_filename() + '.html'
+        print('dumping page HTML to', filename)
+        with open(filename, 'w') as f:
+            f.write(self.browser.page_source)
+
+    def _get_filename(self):
+        timestamp = datetime.now().isoformat().replace(':', '.')[:19]
+        return f'{SCREEN_DUMP_LOCATION}/' \
+               f'{self.__class__.__name__}.{self._testMethodName}-window{self._windowid}-{timestamp}'
 
     def get_item_input_box(self):
         return self.browser.find_element(by=By.ID, value='id_text')
