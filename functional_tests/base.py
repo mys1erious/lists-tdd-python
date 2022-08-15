@@ -11,7 +11,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from .server_tools import reset_database
 
 
-MAX_WAIT = 5
+MAX_WAIT = 10
 WAIT_TIME = 0.1
 
 
