@@ -9,7 +9,7 @@
     <ul>
         {% if owner.list_set %}
             {% for list in owner.list_set.all() %}
-                <li><a href="{{ list.get_absolute_url }}">{{ list.name }}</a></li>
+                <li><a href="{{ list.get_absolute_url() }}">{{ list.name }}</a></li>
             {% endfor %}
         {% endif %}
     </ul>
