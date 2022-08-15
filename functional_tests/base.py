@@ -3,6 +3,7 @@ import time
 
 from selenium import webdriver
 from selenium.common import WebDriverException
+from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
@@ -41,6 +42,13 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def get_item_input_box(self):
         return self.browser.find_element(by=By.ID, value='id_text')
+
+    def add_list_item(self, item_text):
+        num_rows = len(self.browser.find_elements(by=By.CSS_SELECTOR, value='#id_list_table tr'))
+        self.get_item_input_box().send_keys(item_text)
+        self.get_item_input_box().send_keys(Keys.ENTER)
+        item_number = num_rows+1
+        self.wait_for_row_in_list_table(f'{item_number}: {item_text}')
 
     @wait
     def wait_for(self, fn):

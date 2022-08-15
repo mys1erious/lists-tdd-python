@@ -14,7 +14,7 @@ urlpatterns = [
         name='view_list'
     ),
     path(
-        route='users/<str:pk>/',
+        route='users/<str:email>/',
         view=my_lists,
         name='my_lists'
     )
