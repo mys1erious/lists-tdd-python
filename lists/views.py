@@ -34,3 +34,6 @@ def new_list(request):
 
         return render(request, 'lists/home.html', {'form': form})
 
+
+def my_lists(request, pk):
+    return render(request, 'lists/my_lists.html')

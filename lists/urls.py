@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import new_list, view_list
+from .views import new_list, view_list, my_lists
 
 
 urlpatterns = [
@@ -12,5 +12,10 @@ urlpatterns = [
         route='<int:pk>/',
         view=view_list,
         name='view_list'
+    ),
+    path(
+        route='users/<str:pk>/',
+        view=my_lists,
+        name='my_lists'
     )
 ]
