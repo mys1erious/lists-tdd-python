@@ -7,9 +7,32 @@
 {% endblock %}
 
 {% block table %}
+    <div>List owner: <span id="id_list_owner">{{ list.owner.email }}</span></div>
     <table id="id_list_table" class="table">
         {% for item in list.item_set.all() %}
             <tr><td>{{ loop.index }}: {{ item.text }}</td></tr>
         {% endfor %}
     </table>
+{% endblock %}
+
+
+{% block share_form %}
+    <form method="POST" action="{{ url('share_list', kwargs={'pk': list.id}) }}">
+        {{ csrf_input }}
+        <span>Share:</span>
+        <input class="form-control"
+               name="sharee"
+               type="text"
+               placeholder="your-friend@example.com"
+        />
+    </form>
+{% endblock %}
+
+{% block shared_list %}
+    <span>Shared with:</span>
+    <ul class="list-sharee">
+        {% for sharee in list.shared_with.all() %}
+            <li>{{ sharee.email }}</li>
+        {% endfor %}
+    </ul>
 {% endblock %}

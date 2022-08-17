@@ -1,3 +1,5 @@
+import time
+
 from selenium.webdriver.common.by import By
 
 
@@ -10,5 +12,5 @@ class MyListsPage:
         self.test.browser.find_element(by=By.LINK_TEXT, value='My lists').click()
         self.test.wait_for(lambda: self.test.assertEqual(
             self.test.browser.find_element(by=By.TAG_NAME, value='h1').text,
-            'My Lists'
+            'My lists'
         ))

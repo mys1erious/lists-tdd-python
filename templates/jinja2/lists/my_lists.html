@@ -14,3 +14,15 @@
         {% endif %}
     </ul>
 {% endblock %}
+
+{% block shared_list %}
+        <h2>Shared lists</h2>
+    <ul class="list-sharee">
+        {% for shared_list in owner.shared_with.all() %}
+            <li>
+                <a href="{{ shared_list.get_absolute_url() }}">{{ shared_list.name }}</a>
+                <div>by <span id="id_list_owner">{{ shared_list.owner.email }}</span></div>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

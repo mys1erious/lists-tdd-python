@@ -53,6 +53,13 @@ class ListModelTest(TestCase):
         Item.objects.create(list=lst, text='second item')
         self.assertEqual(lst.name, 'first item')
 
+    def test_share_with_add_adds_user_to_shared_with_query(self):
+        user = User.objects.create(email='edith@example.com')
+        lst = List.objects.create()
+        lst.shared_with.add(user)
+
+        self.assertIn(user, lst.shared_with.all())
+
 
 class ListAndItemModelTest(TestCase):
     def test_item_is_related_to_list(self):

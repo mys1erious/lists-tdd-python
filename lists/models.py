@@ -1,6 +1,10 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.urls import reverse
 from django.conf import settings
+
+
+User = get_user_model()
 
 
 class Item(models.Model):
@@ -24,6 +28,11 @@ class List(models.Model):
         to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         blank=True, null=True
+    )
+    shared_with = models.ManyToManyField(
+        to=settings.AUTH_USER_MODEL,
+        blank=True,
+        related_name='shared_with'
     )
 
     @property

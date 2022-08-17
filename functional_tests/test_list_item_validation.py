@@ -23,21 +23,21 @@ class ItemValidationTest(FunctionalTest):
 
         # And she can submit it successfully
         self.get_item_input_box().send_keys(Keys.ENTER)
-        self.wait_for_row_in_list_table('1: Buy milk')
+        self.wait_for_row_in_list_table('Buy milk', 1)
 
         # Perversely, she now decides to submit a second blank list item
         self.get_item_input_box().send_keys(Keys.ENTER)
 
         # Again, the browser will not comply
-        self.wait_for_row_in_list_table('1: Buy milk')
+        self.wait_for_row_in_list_table('Buy milk', 1)
         self.wait_for(lambda: self.browser.find_element(by=By.CSS_SELECTOR, value='#id_text:invalid'))
 
         # And she can correct it by filling some text in
         self.get_item_input_box().send_keys('Make tea')
         self.wait_for(lambda: self.browser.find_element(by=By.CSS_SELECTOR, value='#id_text:valid'))
         self.get_item_input_box().send_keys(Keys.ENTER)
-        self.wait_for_row_in_list_table('1: Buy milk')
-        self.wait_for_row_in_list_table('2: Make tea')
+        self.wait_for_row_in_list_table('Buy milk', 1)
+        self.wait_for_row_in_list_table('Make tea', 2)
 
     def test_cant_add_duplicate_items(self):
         # Edith goes to the home page and starts a new list

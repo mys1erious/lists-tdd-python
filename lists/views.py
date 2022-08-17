@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import get_user_model
 
 from .models import Item, List
@@ -39,3 +39,16 @@ def new_list(request):
 def my_lists(request, email):
     owner = User.objects.get(email=email)
     return render(request, 'lists/my_lists.html', {'owner': owner})
+
+
+def share_list(request, pk):
+    if request.method == 'POST':
+        lst = get_object_or_404(List, pk=pk)
+
+        sharee_email = request.POST.get('sharee', '')
+        try:
+            user_to_share = User.objects.get(email=sharee_email)
+            lst.shared_with.add(user_to_share)
+            return redirect(lst)
+        except User.DoesNotExist:
+            return redirect(lst)
