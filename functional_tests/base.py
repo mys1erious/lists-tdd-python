@@ -74,16 +74,6 @@ class FunctionalTest(StaticLiveServerTestCase):
         return f'{SCREEN_DUMP_LOCATION}/' \
                f'{self.__class__.__name__}.{self._testMethodName}-window{self._windowid}-{timestamp}'
 
-    def get_item_input_box(self):
-        return self.browser.find_element(by=By.ID, value='id_text')
-
-    def add_list_item(self, item_text):
-        num_rows = len(self.browser.find_elements(by=By.CSS_SELECTOR, value='#id_list_table tr'))
-        self.get_item_input_box().send_keys(item_text)
-        self.get_item_input_box().send_keys(Keys.ENTER)
-        item_number = num_rows+1
-        self.wait_for_row_in_list_table(f'{item_number}: {item_text}')
-
     def create_pre_authenticated_session(self, email):
         if self.staging_server:
             session_key = create_session_on_server(self.staging_server, email)
@@ -102,12 +92,6 @@ class FunctionalTest(StaticLiveServerTestCase):
     @wait
     def wait_for(self, fn):
         return fn()
-
-    @wait
-    def wait_for_row_in_list_table(self, row_text):
-        table = self.browser.find_element(by=By.ID, value='id_list_table')
-        rows = table.find_elements(by=By.TAG_NAME, value='tr')
-        self.assertIn(row_text, [row.text for row in rows])
 
     @wait
     def wait_for_login(self, email):
