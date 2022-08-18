@@ -1,5 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
+from django.forms import ModelForm
 
 from .models import Item, List
 
@@ -21,6 +22,11 @@ class ItemForm(forms.models.ModelForm):
             'text': {'required': EMPTY_ITEM_ERROR}
         }
 
+    def save(self, for_list=None):
+        if for_list:
+            self.instance.list = for_list
+        return super().save()
+
 
 class ExistingListItemForm(ItemForm):
     def __init__(self, for_list, *args, **kwargs):
@@ -33,6 +39,9 @@ class ExistingListItemForm(ItemForm):
         except ValidationError as e:
             e.error_dict = {'text': [DUPLICATE_ITEM_ERROR]}
             self._update_errors(e)
+
+    def save(self):
+        return ModelForm.save(self)
 
 
 class NewListForm(ItemForm):

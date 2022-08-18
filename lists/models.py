@@ -19,6 +19,9 @@ class Item(models.Model):
         unique_together = ('list', 'text')
         ordering = ('id',)
 
+    def get_absolute_url(self):
+        return reverse('view_list', args=[self.list.id])
+
     def __str__(self):
         return self.text
 

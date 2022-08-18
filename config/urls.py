@@ -9,7 +9,7 @@ from accounts import urls as account_urls
 urlpatterns = [
     path(
         route='',
-        view=list_views.home_page,
+        view=list_views.HomePageView.as_view(),
         name='home'
     ),
     path(

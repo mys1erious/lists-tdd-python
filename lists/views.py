@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import get_user_model
+from django.views.generic import FormView, CreateView, DetailView
 
 from .models import Item, List
 from .forms import ItemForm, ExistingListItemForm, NewListForm
@@ -52,3 +53,28 @@ def share_list(request, pk):
             return redirect(lst)
         except User.DoesNotExist:
             return redirect(lst)
+
+
+class HomePageView(FormView):
+    template_name = 'lists/home.html'
+    form_class = ItemForm
+
+
+class NewListView(CreateView):
+    template_name = 'lists/home.html'
+    form_class = NewListForm
+
+    def form_valid(self, form):
+        lst = form.save(owner=self.request.user)
+        return redirect(lst)
+
+
+class ViewAndAddToList(DetailView, CreateView):
+    model = List
+    template_name = 'lists/list.html'
+    form_class = ExistingListItemForm
+
+    def get_form(self, form_class=None):
+        self.object = self.get_object()
+        return self.form_class(for_list=self.object, data=self.request.POST)
+
