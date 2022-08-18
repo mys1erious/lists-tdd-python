@@ -4,7 +4,6 @@ from django.contrib import messages, auth
 from django.urls import reverse
 
 from .models import Token
-from .authentication import PasswordlessAuthenticationBackend
 
 
 def send_login_email(request):

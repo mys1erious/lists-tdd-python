@@ -14,7 +14,7 @@ from .server_tools import reset_database, create_session_on_server
 from .management.commands.create_session import create_pre_authenticated_session
 
 
-MAX_WAIT = 10  # dont forget to change back to 20
+MAX_WAIT = 20  # dont forget to change back to 20
 WAIT_TIME = 0.1
 SCREEN_DUMP_LOCATION = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), 'screendumps'
@@ -44,14 +44,14 @@ class FunctionalTest(StaticLiveServerTestCase):
             reset_database(self.staging_server)
 
     def tearDown(self) -> None:
-        # if self._test_has_failed():
-        #     if not os.path.exists(SCREEN_DUMP_LOCATION):
-        #         os.makedirs(SCREEN_DUMP_LOCATION)
-        #     for ix, handle in enumerate(self.browser.window_handles):
-        #         self._windowid = ix
-        #         self.browser.switch_to.window(handle)
-        #         self.take_screenshot()
-        #         self.dump_html()
+        if self._test_has_failed():
+            if not os.path.exists(SCREEN_DUMP_LOCATION):
+                os.makedirs(SCREEN_DUMP_LOCATION)
+            for ix, handle in enumerate(self.browser.window_handles):
+                self._windowid = ix
+                self.browser.switch_to.window(handle)
+                self.take_screenshot()
+                self.dump_html()
         self.browser.quit()
         super().tearDown()
 
