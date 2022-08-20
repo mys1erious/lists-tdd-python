@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 
+from . import api_urls
 from lists import urls as list_urls
 from lists import views as list_views
 from accounts import urls as account_urls
@@ -19,6 +20,10 @@ urlpatterns = [
     path(
         route='accounts/',
         view=include(account_urls)
+    ),
+    path(
+        route='api/',
+        view=include(api_urls)
     )
 
     # path('admin/', admin.site.urls),

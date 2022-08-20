@@ -7,11 +7,15 @@
 {% endblock %}
 
 {% block table %}
-    <div>List owner: <span id="id_list_owner">{{ list.owner.email }}</span></div>
+    <div>List owner:
+        {% if list.owner and list.owner.email %}
+            <span id="id_list_owner">{{ list.owner.email }}</span>
+        {% else %}
+            <span id="id_list_owner">self owned list.</span>
+        {% endif %}
+    </div>
     <table id="id_list_table" class="table">
-        {% for item in list.item_set.all() %}
-            <tr><td>{{ loop.index }}: {{ item.text }}</td></tr>
-        {% endfor %}
+
     </table>
 {% endblock %}
 
@@ -36,3 +40,15 @@
         {% endfor %}
     </ul>
 {% endblock %}
+
+{% block scripts %}
+    <script>
+        $(document).ready(function() {
+            window.TddLists.initialize({
+                listApiUrl: "{{ url('list-detail', kwargs={'pk': list.id}) }}",
+                itemsApiUrl: "{{ url('item-list') }}",
+                listId: {{ list.id }},
+            });
+        });
+    </script>
+{% endblock scripts %}

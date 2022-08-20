@@ -9,36 +9,220 @@
 </head>
 <body>
     <div id="qunit"></div>
-
     <div id="qunit-fixture">
-        <form>
+        <form id="id_item_form">
             <input name="text" />
-            <div class="has-error">Error text</div>
+            <input type="hidden" name="csrfmiddlewaretoken" value="tokey" />
+            <div class="has-error">
+                <div class="help-block">Error text</div>
+            </div>
         </form>
+        <table id="id_list_table"></table>
     </div>
 
     <script src="../jquery.js"></script>
     <script src="qunit-2.19.1.js"></script>
     <script src="../list.js"></script>
+    <script src="sinon-14.0.0.js"></script>
 
     <script>
-        QUnit.test('errors should be hidden on keypress', (assert) => {
-            window.TddBook.initialize();
+        /* global sinon */
+
+        QUnit.test('errors should be hidden on keypress', function(assert) {
+            window.TddLists.initialize();
             $('input[name="text"]').trigger('keypress');
             assert.equal($('.has-error').is(':visible'), false);
         });
 
-        QUnit.test('errors should be hidden on click', (assert) => {
-            window.TddBook.initialize();
+        QUnit.test('errors should be hidden on click', function(assert) {
+            window.TddLists.initialize();
             $('input[name="text"]').trigger('click');
             assert.equal($('.has-error').is(':visible'), false);
         });
 
-        QUnit.test('errors arent hidden if there is no keypress or click', (assert) => {
-            window.TddBook.initialize();
+        QUnit.test('errors arent hidden if there is no keypress or click', function(assert) {
+            window.TddLists.initialize();
             assert.equal($('.has-error').is(':visible'), true);
         });
 
+
+        let server, spy;
+        QUnit.testStart(function() {
+            server = sinon.fakeServer.create();
+        });
+        QUnit.testDone(function() {
+            server.restore();
+            sinon.restore();
+        });
+
+
+        QUnit.test('should call updateItems on initialize', function (assert) {
+            let params = {
+                listApiUrl: '/list/api/x/',
+                itemsApiUrl: '/items/api/url/',
+                listId: 7
+            };
+
+            const spy = sinon.stub;
+            spy(window.TddLists, 'updateItems');
+            window.TddLists.initialize(params);
+
+            assert.equal(
+                window.TddLists.updateItems.lastCall.args,
+                params.listApiUrl
+            );
+        });
+
+        QUnit.test('updateItems should get correct url by ajax', function (assert) {
+            var url = '/given/api/url';
+            window.TddLists.updateItems(url);
+
+            assert.equal(server.requests.length, 1);
+            var request = server.requests[0];
+            assert.equal(request.url, url);
+            assert.equal(request.method, 'GET');
+        });
+
+        QUnit.test('updateItems should fill in lists table from ajax response', function(assert) {
+            var url = '/given/api/url';
+            var responseData = {id: 7, items: [
+                {'id': 101, 'list': 3, 'text': 'item 1 text'},
+                {'id': 102, 'list': 3, 'text': 'item 2 text'},
+            ]};
+            server.respondWith('GET', url, [
+                200, {'Content-Type': 'application/json'}, JSON.stringify(responseData)
+            ]);
+            window.TddLists.updateItems(url);
+
+            server.respond();
+
+            var rows = $('#id_list_table tr');
+            assert.equal(rows.length, 2);
+            var row1 =  $('#id_list_table tr:first-child td');
+            assert.equal(row1.text(), '1: item 1 text');
+            var row2 =  $('#id_list_table tr:last-child td');
+            assert.equal(row2.text(), '2: item 2 text');
+        });
+
+        QUnit.test('should intercept form submit and do ajax post', function (assert) {
+            let params = {
+                listApiUrl: '/list/api/x/',
+                itemsApiUrl: '/items/api/url/',
+                listId: 7
+            };
+
+            window.TddLists.initialize(params);
+
+            $('#id_item_form input[name="text"]').val('user input');
+            $('#id_item_form input[name="csrfmiddlewaretoken"]').val('tokeney');
+            $('#id_item_form').submit();
+
+            assert.equal(server.requests.length, 2);
+            var request = server.requests[1];
+            assert.equal(request.url, params.itemsApiUrl);
+            assert.equal(request.method, 'POST');
+            assert.equal(
+                request.requestBody,
+                'list=7&text=user+input&csrfmiddlewaretoken=tokeney'
+            );
+         });
+
+        QUnit.test('should call updateItems after successful post', function (assert) {
+            let params = {
+                listApiUrl: '/list/api/x/',
+                itemsApiUrl: '/items/api/url/',
+                listId: 7
+            };
+            window.TddLists.initialize(params);
+            var response = [
+                201,
+                {'Content-Type': 'application/json'},
+                JSON.stringify({}),
+            ];
+            server.respondWith('POST', params.itemsApiUrl, response);
+            $('#id_item_form input[name="text"]').val('user input');
+            $('#id_item_form input[name="csrfmiddlewaretoken"]').val('tokeney');
+            $('#id_item_form').submit();
+
+            const spy = sinon.stub;
+            spy(window.TddLists, 'updateItems');
+            server.respond();
+
+            assert.equal(
+                window.TddLists.updateItems.lastCall.args,
+                params.listApiUrl
+            );
+        });
+
+        QUnit.test('should display errors on post failure', function (assert) {
+            let params = {
+                listApiUrl: '/list/api/x/',
+                itemsApiUrl: '/items/api/url/',
+                listId: 7
+            };
+
+            window.TddLists.initialize(params);
+            server.respondWith('POST', params.itemsApiUrl, [
+                400,
+                {'Content-Type': 'application/json'},
+                JSON.stringify({'text': ['something is amiss']})
+            ]);
+            $('.has-error').hide();
+
+            $('#id_item_form').submit();
+            server.respond(); // post
+
+            assert.equal($('.has-error').is(':visible'), true);
+            assert.equal($('.has-error .help-block').text(), 'something is amiss');
+        });
+
+        QUnit.test('should hide errors on post success', function (assert) {
+            let params = {
+                listApiUrl: '/list/api/x/',
+                itemsApiUrl: '/items/api/url/',
+                listId: 7
+            };
+
+            window.TddLists.initialize(params);
+            var response = [
+                201,
+                {'Content-Type': 'application/json'},
+                JSON.stringify({}),
+            ];
+            server.respondWith(response);
+            $('.has-error').show();
+
+
+            $('#id_item_form').submit();
+            server.respond(); // post
+
+            assert.equal($('.has-error').is(':visible'), false);
+        });
+
+        QUnit.test('should display generic error if no error json', function (assert) {
+            let params = {
+                listApiUrl: '/list/api/x/',
+                itemsApiUrl: '/items/api/url/',
+                listId: 7
+            };
+            window.TddLists.initialize(params);
+            server.respondWith('POST', params.itemsApiUrl, [
+                502,
+                {},
+                JSON.stringify({}),
+            ]);
+            $('.has-error help-block').text('old error');
+            $('.has-error').hide();
+
+            $('#id_item_form').submit();
+            server.respond(); // post
+
+            assert.equal($('.has-error').is(':visible'), true);
+            assert.equal(
+                $('.has-error .help-block').text(),
+                'Error talking to server. Please try again.'
+            );
+        });
     </script>
 </body>
 </html>

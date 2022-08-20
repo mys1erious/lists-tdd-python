@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'lists',
     'functional_tests',
 
+    'rest_framework',
+
     # 'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

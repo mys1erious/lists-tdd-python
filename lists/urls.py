@@ -5,12 +5,12 @@ from . import views
 urlpatterns = [
     path(
         route='new',
-        view=views.NewListView.as_view(),
+        view=views.new_list,
         name='new_list'
     ),
     path(
         route='<int:pk>/',
-        view=views.ViewAndAddToList.as_view(),
+        view=views.view_list,
         name='view_list'
     ),
     path(
