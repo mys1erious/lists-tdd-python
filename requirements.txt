@@ -8,6 +8,7 @@ certifi==2022.6.15
 cffi==1.15.1
 cryptography==37.0.4
 Django==4.1
+djangorestframework==3.14.0
 Fabric3==1.14.post1
 gunicorn==20.1.0
 h11==0.13.0
@@ -23,6 +24,7 @@ pyOpenSSL==22.0.0
 pyparsing==3.0.9
 PySocks==1.7.1
 python-dotenv==0.20.0
+pytz==2022.5
 PyYAML==6.0
 resolvelib==0.8.1
 selenium==4.3.0
