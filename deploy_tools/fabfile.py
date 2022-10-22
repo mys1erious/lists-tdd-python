@@ -27,7 +27,7 @@ def deploy():
 
     _create_directory_structure_if_necessary(site_folder)
     _get_latest_source(source_folder)
-    _update_settings(source_folder, env.host)
+    _update_config(source_folder, env.host)
     _update_virtualenv(source_folder)
 
     _update_static_files(source_folder)
@@ -54,7 +54,7 @@ def _get_latest_source(source_folder):
     run(f'cd {source_folder} && git reset --hard {current_commit}')
 
 
-def _update_settings(source_folder, site_name):
+def _update_config(source_folder, site_name):
     wsgi_path = source_folder + '/config/wsgi.py'
     sed(wsgi_path,
         'os.environ.setdefault.*$',
@@ -70,6 +70,16 @@ def _update_settings(source_folder, site_name):
     settings_path = source_folder + f'{DJANGO_SETTINGS_PATH}'
     sed(settings_path, "ALLOWED_HOSTS =.+$", f'ALLOWED_HOSTS = ["{site_name}"]')
 
+    dot_env_path = source_folder + '/config/settings/.env'
+    run(f'touch {dot_env_path}')
+
+    if 'staging' in env.host:
+        append(dot_env_path, f'export DJANGO_SECRET_KEY="{get_env_var("DJANGO_SECRET_KEY_STAGING")}"')
+    else:
+        append(dot_env_path, f'export DJANGO_SECRET_KEY="{get_env_var("DJANGO_SECRET_KEY")}"')
+    append(dot_env_path, f'export EMAIL_HOST_USER="{get_env_var("EMAIL_HOST_USER")}"')
+    append(dot_env_path, f'export EMAIL_HOST_PASSWORD="{get_env_var("EMAIL_HOST_PASSWORD")}"')
+
 
 def _update_virtualenv(source_folder):
     virtualenv_folder = source_folder + '/../virtualenv'
@@ -77,14 +87,7 @@ def _update_virtualenv(source_folder):
         run(f'python3.9 -m venv {virtualenv_folder}')
 
         activate_script_path = virtualenv_folder + '/bin/activate'
-
         append(activate_script_path, f'export DJANGO_SETTINGS_MODULE="{DJANGO_SETTINGS_MODULE}"')
-        if 'staging' in env.host:
-            append(activate_script_path, f'export DJANGO_SECRET_KEY="{get_env_var("DJANGO_SECRET_KEY_STAGING")}"')
-        else:
-            append(activate_script_path, f'export DJANGO_SECRET_KEY="{get_env_var("DJANGO_SECRET_KEY")}"')
-        append(activate_script_path, f'export EMAIL_HOST_USER="{get_env_var("EMAIL_HOST_USER")}"')
-        append(activate_script_path, f'export EMAIL_HOST_PASSWORD="{get_env_var("EMAIL_HOST_PASSWORD")}"')
 
     run(f'{virtualenv_folder}/bin/pip install -r {source_folder}/requirements.txt')
 
