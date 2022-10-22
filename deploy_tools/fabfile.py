@@ -1,20 +1,41 @@
+import os
+
 from fabric.contrib.files import append, exists, sed
 from fabric.api import env, local, run
-import random
+from fabric.operations import sudo
+from dotenv import load_dotenv
+
+
+load_dotenv('../config/settings/.env')
+def get_env_var(var_name):
+    try:
+        return os.getenv(var_name)
+    except KeyError:
+        error_msg = f'Set the {var_name} env variable.'
+        raise ValueError(error_msg)
+env.password = get_env_var('SUDO_PASSWORD')
 
 
 REPO_URL = 'https://github.com/mys1erious/lists-tdd-python.git'
+DJANGO_SETTINGS_MODULE = 'config.settings.prod'
+DJANGO_SETTINGS_PATH = '/config/settings/prod.py'
 
 
 def deploy():
     site_folder = f'/home/{env.user}/sites/{env.host}'
     source_folder = site_folder + '/source'
+
     _create_directory_structure_if_necessary(site_folder)
     _get_latest_source(source_folder)
     _update_settings(source_folder, env.host)
     _update_virtualenv(source_folder)
+
     _update_static_files(source_folder)
     _update_database(source_folder)
+
+    _create_nginx_conf(source_folder)
+    _create_systemd_conf(source_folder)
+    _start_service()
 
 
 def _create_directory_structure_if_necessary(site_folder):
@@ -37,19 +58,17 @@ def _update_settings(source_folder, site_name):
     wsgi_path = source_folder + '/config/wsgi.py'
     sed(wsgi_path,
         'os.environ.setdefault.*$',
-        'os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.prod")'
+        f'os.environ.setdefault("DJANGO_SETTINGS_MODULE", "{DJANGO_SETTINGS_MODULE}")'
         )
 
-    settings_path = source_folder + '/config/settings/prod.py'
+    manage_py_path = source_folder + '/manage.py'
+    sed(manage_py_path,
+        'os.environ.setdefault.*$',
+        f'os.environ.setdefault("DJANGO_SETTINGS_MODULE", "{DJANGO_SETTINGS_MODULE}")'
+        )
+
+    settings_path = source_folder + f'{DJANGO_SETTINGS_PATH}'
     sed(settings_path, "ALLOWED_HOSTS =.+$", f'ALLOWED_HOSTS = ["{site_name}"]')
-
-    secret_key_file = source_folder + '/config/settings/secret_key.py'
-    if not exists(secret_key_file):
-        chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
-        key = ''.join(random.SystemRandom().choice(chars) for _ in range(50))
-        append(secret_key_file, f'SECRET_KEY = "{key}"')
-
-    append(settings_path, '\nfrom .secret_key import SECRET_KEY')
 
 
 def _update_virtualenv(source_folder):
@@ -58,7 +77,14 @@ def _update_virtualenv(source_folder):
         run(f'python3.9 -m venv {virtualenv_folder}')
 
         activate_script_path = virtualenv_folder + '/bin/activate'
-        append(activate_script_path, 'export DJANGO_SETTINGS_MODULE="config.settings.prod"')
+
+        append(activate_script_path, f'export DJANGO_SETTINGS_MODULE="{DJANGO_SETTINGS_MODULE}"')
+        if 'staging' in env.host:
+            append(activate_script_path, f'export DJANGO_SECRET_KEY="{get_env_var("DJANGO_SECRET_KEY_STAGING")}"')
+        else:
+            append(activate_script_path, f'export DJANGO_SECRET_KEY="{get_env_var("DJANGO_SECRET_KEY")}"')
+        append(activate_script_path, f'export EMAIL_HOST_USER="{get_env_var("EMAIL_HOST_USER")}"')
+        append(activate_script_path, f'export EMAIL_HOST_PASSWORD="{get_env_var("EMAIL_HOST_PASSWORD")}"')
 
     run(f'{virtualenv_folder}/bin/pip install -r {source_folder}/requirements.txt')
 
@@ -69,3 +95,51 @@ def _update_static_files(source_folder):
 
 def _update_database(source_folder):
     run(f'cd {source_folder} && ../virtualenv/bin/python manage.py migrate --noinput')
+
+
+def _create_nginx_conf(source_folder):
+    sudo(f'sed "s/SITENAME/{env.host}/g" '
+        f'{source_folder}/deploy_tools/nginx.template.conf '
+        f'| tee /etc/nginx/sites-available/{env.host}')
+
+    sudo(f'ln -s /etc/nginx/sites-available/{env.host} '
+         f'/etc/nginx/sites-enabled/{env.host}')
+
+
+def _create_systemd_conf(source_folder):
+    sudo(f'sed "s/SITENAME/{env.host}/g" '
+         f'{source_folder}/deploy_tools/gunicorn-systemd.template.service '
+         f'| sudo tee /etc/systemd/system/gunicorn-{env.host}.service')
+
+
+def _reload_daemon_nginx():
+    sudo('systemctl daemon-reload')
+    sudo('systemctl reload nginx')
+
+
+def _start_service():
+    _reload_daemon_nginx()
+    sudo(f'systemctl enable gunicorn-{env.host}')
+    sudo(f'systemctl start gunicorn-{env.host}')
+
+
+def cleanup():
+    site_folder = f'/home/{env.user}/sites/{env.host}'
+
+    _remove_source_site_folder(site_folder)
+    _remove_nginx_conf()
+    _remove_systemd_conf()
+    _reload_daemon_nginx()
+
+def _remove_source_site_folder(site_folder):
+    sudo(f'rm -r {site_folder}/../{env.host}')
+
+
+def _remove_nginx_conf():
+    sudo(f'rm /etc/nginx/sites-available/{env.host}')
+    sudo(f'rm /etc/nginx/sites-enabled/{env.host}')
+
+
+def _remove_systemd_conf():
+    sudo(f'sudo rm /etc/systemd/system/gunicorn-{env.host}.service')
+    sudo(f'systemctl stop gunicorn-{env.host}.service')
