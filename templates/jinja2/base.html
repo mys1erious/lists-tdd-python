@@ -26,7 +26,6 @@
                     <li><a href="{{ url('logout') }}">Log out</a></li>
                 </ul>
             {% else %}
-                {{ user }}
                 <form class="navbar-form navbar-right"
                       method="POST"
                       action="{{ url('send_login_email') }}"
